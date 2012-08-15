@@ -16,19 +16,24 @@ typedef struct node {
 } node;
 
 /* Create a new singly linked list */
-void SingleListCreateNode(node*, void*, int);
+void SinglyListCreateNode(node*, void*, int);
 
 /* Append to the singly linked list after specified node */
-void SingleListAppendAfter(node*, node*);
+void SinglyListAppendAfter(node**, void*, int);
+
+
+
+
+
 
 /* Append to the singly linked list at the beginning of a list */
-void SingleListAppendBeginning(node*, node*);
+void SingleListAppendBeginning(node**, void*);
 
 /* Remove from the list after specified node */
-void SingleListRemoveAfter(node*, node*);
+void SingleListRemoveAfter(node**, void*);
 
-/* Remove from list before the specified node */
-void SingleListRemoveBefore(node*, node*);
+/* Remove from list at the beginning */
+node* SingleListRemoveBeginning(node**, void**);
 
 /* Destroy the list */
-void SingleListDestroy(node*, /*free function*/void (*freefn)(void*));
+void SingleListDestroy(node**, /*free function*/void (*freefn)(node*));
