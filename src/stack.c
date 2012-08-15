@@ -97,11 +97,75 @@ void int_test() {
   StackDispose(s);
 }
 
+// freeing function for cstrings
+void freefn(void* elem) {
+  // elem is a char** (vector of char* or cstrings)
+  free(*(char**)elem);
+}
+
+// strdup function for deep copying cstrings
+char* strdup(const char* s) {
+  int len, i=0;
+  while(s[i]!='\0') {
+    i++;
+  }
+  len = i;
+
+  char* dup = realloc(NULL,len*sizeof(char));
+  dup = memcpy(dup,s,len*sizeof(char));
+  return dup;
+}
+
+// TESTING ONLY
+void cstr_test() {
+  // create a new stack
+  stack s;
+  StackNew(&s, sizeof(char*), &freefn);
+
+  // push cstrings onto the stack
+  char* str1 = "help\0";
+  char* str2 = "me\0";
+  printf("pushing '%s' onto the stack...\n",str1);
+  char* copy = strdup(str1);
+  StackPush(&s,&copy);
+  copy = strdup(str2);
+  printf("pushing '%s' onto the stack...\n",str2);
+  StackPush(&s,&copy);
+
+  // attempt to free something copied to the stack
+  // this will prove - do we have a real copy on the stack or just a copy of the pointer?
+  // free(str1);  // FAILS with a seg fault
+  //free(str2);  // If you remove the previous line, this fails with an invalid pointer error
+  // What we need to be sure of is that a duplicate deep copy of the cstrings pushed to the stack are created prior to pushing AND the pointer is not stored anywhere on the client (otherwise the client may still be able to free it)
+
+  // get items off the stack
+  char* str = realloc(NULL,(sizeof(char)*24));  // use an arbitrary space large enough to hold those items we know are on the stack
+  StackPop(&s,&str);
+  printf("popping '%s' off the stack...\n",str);
+  StackPop(&s,&str);
+  printf("popping '%s' off the stack...\n",str);
+
+  printf("Disposing of the stack...\n");
+  StackDispose(&s);
+}
+
 
 // TEST DRIVER
 int main(char** argv, int argc) {
 
-  int_test();
+  // int_test();
+
+  cstr_test();
  
 }
+
+/** NOTES:
+ * 
+ * 2 Bugs:
+ *  - Need to deep copy cstrings before pushing to the stack and avoid having the client keep the pointer
+ * - Attempting to clear the stack WITHOUT popping off all data causes a seg fault!
+ * 
+ * - FIXED bug with deep copying strings - implemented strdup (not part of stdlib on this architecture)
+ * - FIXED bug where attempting to dispose the stack without popping all elements caused seg fault.
+ */
 
